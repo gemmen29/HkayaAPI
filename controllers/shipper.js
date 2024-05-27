@@ -3,7 +3,8 @@ const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 
 const getAllShipper = async (req, res) => {
-  res.send('Get all shipper');
+  const shippers = await Shipper.find({});
+  res.status(StatusCodes.OK).json({ shippers, nbShippers: shippers.length });
 };
 
 const createShipper = async (req, res) => {
