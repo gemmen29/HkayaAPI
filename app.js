@@ -12,7 +12,7 @@ const connectDB = require('./db/connect');
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
 // routes
-
+const shipperRouter = require('./routes/shipper');
 app.use(cors());
 
 app.use(morgan('tiny'));
@@ -22,6 +22,8 @@ app.use(express.static('./public'));
 app.get('/', (req, res) => {
   res.send('<h1> Hkaya API </h1>');
 });
+
+app.use('/api/v1/shipper', shipperRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
