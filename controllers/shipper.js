@@ -13,7 +13,14 @@ const createShipper = async (req, res) => {
 };
 
 const getSingleShipper = async (req, res) => {
-  res.send('Get single shipper');
+  const { id: shipperId } = req.params;
+  const shipper = await Shipper.findOne({ _id: shipperId });
+
+  if (!shipper) {
+    throw new CustomError.NotFoundError(`No shipper with id : ${shipperId}`);
+  }
+
+  res.status(StatusCodes.OK).json(shipper);
 };
 
 const updateShipper = async (req, res) => {
