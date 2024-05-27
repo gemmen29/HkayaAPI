@@ -3,7 +3,10 @@ const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 
 const getAllOrders = async (req, res) => {
-  res.send('Get all orders');
+  const orders = await Order.find({})
+    .sort('createdAt')
+    .populate('shipper', 'name uid motorcycleNumber');
+  res.status(StatusCodes.OK).json({ orders, count: orders.length });
 };
 
 const createOrder = async (req, res) => {

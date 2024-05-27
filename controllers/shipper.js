@@ -4,7 +4,7 @@ const CustomError = require('../errors');
 
 const getAllShipper = async (req, res) => {
   const shippers = await Shipper.find({});
-  res.status(StatusCodes.OK).json({ shippers, nbShippers: shippers.length });
+  res.status(StatusCodes.OK).json({ shippers, count: shippers.length });
 };
 
 const createShipper = async (req, res) => {
