@@ -14,6 +14,10 @@ const ShipperSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Please provide a motorcycle number'],
     },
+    suspended: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
