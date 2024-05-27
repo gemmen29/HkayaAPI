@@ -9,6 +9,7 @@ const ShipperSchema = new mongoose.Schema(
     uid: {
       type: String,
       required: [true, 'Please provide a uid'],
+      unique: true,
     },
     motorcycleNumber: {
       type: String,

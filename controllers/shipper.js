@@ -1,9 +1,14 @@
+const Shipper = require('../models/Shipper');
+const { StatusCodes } = require('http-status-codes');
+const CustomError = require('../errors');
+
 const getAllShipper = async (req, res) => {
   res.send('Get all shipper');
 };
 
 const createShipper = async (req, res) => {
-  res.send('Create new shipper');
+  const shipper = await Shipper.create(req.body);
+  res.status(StatusCodes.CREATED).json(shipper);
 };
 
 const getSingleShipper = async (req, res) => {
