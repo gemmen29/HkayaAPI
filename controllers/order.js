@@ -4,7 +4,32 @@ const CustomError = require('../errors');
 const mongoose = require('mongoose');
 
 const getAllOrders = async (req, res) => {
-  const orders = await Order.find({}).sort('createdAt');
+  // from and to query params are optional
+  const now = new Date();
+  const startDate = new Date(
+    req.query.from ?? new Date(now.getFullYear(), now.getMonth(), 1)
+  );
+  const endDate = new Date(req.query.to ?? now);
+  startDate.setHours(0, 0, 0, 0);
+  endDate.setHours(23, 59, 59, 999);
+
+  console.log(startDate.toLocaleString(), endDate.toLocaleString());
+
+  // setup pagination
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const queryObj = {
+    createdAt: {
+      $gte: startDate,
+      $lt: endDate,
+    },
+  };
+  const orders = await Order.find(queryObj)
+    .sort('createdAt')
+    .skip(skip)
+    .limit(limit);
   res.status(StatusCodes.OK).json({ orders, count: orders.length });
 };
 
