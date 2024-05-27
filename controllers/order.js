@@ -21,6 +21,25 @@ const getAllOrdersperShipper = async (req, res) => {
     .json({ orders, count: orders.length, totalOrdersAmount });
 };
 
+const getAllOrdersStatus = async (req, res) => {
+  const orders = await Order.aggregate([
+    {
+      $group: {
+        _id: '$shipper',
+        shipper: { $first: '$shipper' },
+        total: { $sum: '$total' },
+      },
+    },
+  ]);
+
+  await Order.populate(orders, {
+    path: 'shipper',
+    select: 'name uid motorcycleNumber',
+  });
+
+  res.status(StatusCodes.OK).json({ orders });
+};
+
 const createOrder = async (req, res) => {
   const order = await Order.create(req.body);
   res.status(StatusCodes.CREATED).json(order);
@@ -57,4 +76,5 @@ module.exports = {
   getSingleOrder,
   updateOrder,
   getAllOrdersperShipper,
+  getAllOrdersStatus,
 };
