@@ -55,10 +55,29 @@ const suspendShipper = async (req, res) => {
   res.status(StatusCodes.OK).json({ message: 'Shipper suspended' });
 };
 
+const activeExistingShipper = async (req, res) => {
+  const { id: shipperId } = req.params;
+  const shipper = await Shipper.findOneAndUpdate(
+    { _id: shipperId },
+    { suspended: false },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!shipper) {
+    throw new CustomError.NotFoundError(`No shipper with id : ${shipperId}`);
+  }
+
+  res.status(StatusCodes.OK).json({ message: 'Shipper activated' });
+};
+
 module.exports = {
   getAllShipper,
   createShipper,
   getSingleShipper,
   updateShipper,
   suspendShipper,
+  activeExistingShipper,
 };
