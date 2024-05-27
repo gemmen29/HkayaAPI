@@ -3,9 +3,7 @@ const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 
 const getAllOrders = async (req, res) => {
-  const orders = await Order.find({})
-    .sort('createdAt')
-    .populate('shipper', 'name uid motorcycleNumber');
+  const orders = await Order.find({}).sort('createdAt');
   res.status(StatusCodes.OK).json({ orders, count: orders.length });
 };
 
@@ -22,12 +20,30 @@ const getAllOrdersperShipper = async (req, res) => {
 };
 
 const getAllOrdersStatus = async (req, res) => {
+  const { from, to } = req.query;
+  const startDate = new Date(from ?? Date.now());
+  const endDate = new Date(to ?? startDate);
+  // startDate.setUTCHours(0, 0, 0, 0);
+  // endDate.setUTCHours(23, 59, 59, 999);
+  startDate.setHours(0, 0, 0, 0);
+  endDate.setHours(23, 59, 59, 999);
+  // const to = new Date();
+  // const from = new Date();
+  // from.setHours(from.getHours() - 2);
+  console.log(startDate.toLocaleString(), endDate.toLocaleString());
+
   const orders = await Order.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: startDate, $lt: endDate },
+      },
+    },
     {
       $group: {
         _id: '$shipper',
         shipper: { $first: '$shipper' },
         total: { $sum: '$total' },
+        numOfOrders: { $sum: 1 },
       },
     },
   ]);
