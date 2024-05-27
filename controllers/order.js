@@ -9,6 +9,18 @@ const getAllOrders = async (req, res) => {
   res.status(StatusCodes.OK).json({ orders, count: orders.length });
 };
 
+const getAllOrdersperShipper = async (req, res) => {
+  const orders = await Order.find({ shipper: req.params.id }).sort('createdAt');
+
+  const totalOrdersAmount = orders.reduce((acc, order) => {
+    return acc + order.total;
+  }, 0);
+
+  res
+    .status(StatusCodes.OK)
+    .json({ orders, count: orders.length, totalOrdersAmount });
+};
+
 const createOrder = async (req, res) => {
   const order = await Order.create(req.body);
   res.status(StatusCodes.CREATED).json(order);
@@ -44,4 +56,5 @@ module.exports = {
   createOrder,
   getSingleOrder,
   updateOrder,
+  getAllOrdersperShipper,
 };
