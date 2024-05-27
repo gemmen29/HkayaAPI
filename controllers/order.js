@@ -23,7 +23,17 @@ const getSingleOrder = async (req, res) => {
 };
 
 const updateOrder = async (req, res) => {
-  res.send('Update order');
+  const { id: orderID } = req.params;
+  const order = await Order.findOneAndUpdate({ _id: orderID }, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!order) {
+    throw new CustomError.NotFoundError(`No order with id: ${orderID}`);
+  }
+
+  res.status(StatusCodes.OK).json(order);
 };
 
 module.exports = {
