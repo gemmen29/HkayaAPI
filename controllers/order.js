@@ -1,6 +1,7 @@
 const Order = require('../models/order');
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
+const mongoose = require('mongoose');
 
 const getAllOrders = async (req, res) => {
   const orders = await Order.find({}).sort('createdAt');
@@ -8,11 +9,40 @@ const getAllOrders = async (req, res) => {
 };
 
 const getAllOrdersperShipper = async (req, res) => {
-  const orders = await Order.find({ shipper: req.params.id }).sort('createdAt');
+  const { from, to } = req.query;
 
-  const totalOrdersAmount = orders.reduce((acc, order) => {
-    return acc + order.total;
-  }, 0);
+  const startDate = new Date(from ?? Date.now());
+  const endDate = new Date(to ?? startDate);
+  startDate.setHours(0, 0, 0, 0);
+  endDate.setHours(23, 59, 59, 999);
+
+  const orders = await Order.find({
+    shipper: req.params.id,
+    createdAt: {
+      $gte: startDate,
+      $lt: endDate,
+    },
+  }).sort('createdAt');
+
+  const totalOrdersAmountAggreate = await Order.aggregate([
+    {
+      $match: {
+        shipper: mongoose.Types.ObjectId.createFromHexString(req.params.id),
+        createdAt: { $gte: startDate, $lt: endDate },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: '$total' },
+      },
+    },
+  ]);
+
+  const totalOrdersAmount =
+    totalOrdersAmountAggreate.length > 0
+      ? totalOrdersAmountAggreate[0].total
+      : 0;
 
   res
     .status(StatusCodes.OK)
