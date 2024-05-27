@@ -1,17 +1,16 @@
 const Shipper = require('../models/Shipper');
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
+const pagination = require('../utils/pagination');
 
 const getAllShipper = async (req, res) => {
-  // setup pagination
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-
+  const { skip, limit, totalMatches, numOfPages } = await pagination(
+    Shipper,
+    req
+  );
   const shippers = await Shipper.find({}).sort('name').skip(skip).limit(limit);
-  const totalMatches = await Shipper.countDocuments();
 
-  res.status(StatusCodes.OK).json({ shippers, totalMatches });
+  res.status(StatusCodes.OK).json({ shippers, totalMatches, numOfPages });
 };
 
 const createShipper = async (req, res) => {

@@ -2,6 +2,7 @@ const Order = require('../models/order');
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const mongoose = require('mongoose');
+const pagination = require('../utils/pagination');
 
 const getAllOrders = async (req, res) => {
   // from and to query params are optional
@@ -13,26 +14,25 @@ const getAllOrders = async (req, res) => {
   startDate.setHours(0, 0, 0, 0);
   endDate.setHours(23, 59, 59, 999);
 
-  console.log(startDate.toLocaleString(), endDate.toLocaleString());
-
-  // setup pagination
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-
   const queryObj = {
     createdAt: {
       $gte: startDate,
       $lt: endDate,
     },
   };
+
+  const { skip, limit, totalMatches, numOfPages } = await pagination(
+    Order,
+    req,
+    queryObj
+  );
+
   const orders = await Order.find(queryObj)
     .sort('createdAt')
     .skip(skip)
     .limit(limit);
-  const totalMatches = await Order.countDocuments(queryObj);
 
-  res.status(StatusCodes.OK).json({ orders, totalMatches });
+  res.status(StatusCodes.OK).json({ orders, totalMatches, numOfPages });
 };
 
 const getAllOrdersperShipper = async (req, res) => {
@@ -42,11 +42,6 @@ const getAllOrdersperShipper = async (req, res) => {
   startDate.setHours(0, 0, 0, 0);
   endDate.setHours(23, 59, 59, 999);
 
-  // setup pagination
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-
   const queryObj = {
     shipper: mongoose.Types.ObjectId.createFromHexString(req.params.id),
     createdAt: {
@@ -54,6 +49,13 @@ const getAllOrdersperShipper = async (req, res) => {
       $lt: endDate,
     },
   };
+
+  // setup pagination
+  const { skip, limit, totalMatches, numOfPages } = await pagination(
+    Order,
+    req,
+    queryObj
+  );
 
   const orders = await Order.find(queryObj)
     .sort('createdAt')
@@ -77,9 +79,9 @@ const getAllOrdersperShipper = async (req, res) => {
       ? totalOrdersAmountAggreate[0].total
       : 0;
 
-  const totalMatches = await Order.countDocuments(queryObj);
-
-  res.status(StatusCodes.OK).json({ orders, totalMatches, totalOrdersAmount });
+  res
+    .status(StatusCodes.OK)
+    .json({ orders, totalMatches, numOfPages, totalOrdersAmount });
 };
 
 const getAllOrdersStatus = async (req, res) => {
