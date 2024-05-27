@@ -30,7 +30,9 @@ const getAllOrders = async (req, res) => {
     .sort('createdAt')
     .skip(skip)
     .limit(limit);
-  res.status(StatusCodes.OK).json({ orders, count: orders.length });
+  const totalMatches = await Order.countDocuments(queryObj);
+
+  res.status(StatusCodes.OK).json({ orders, totalMatches });
 };
 
 const getAllOrdersperShipper = async (req, res) => {
