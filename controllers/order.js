@@ -9,27 +9,33 @@ const getAllOrders = async (req, res) => {
 };
 
 const getAllOrdersperShipper = async (req, res) => {
-  const { from, to } = req.query;
-
-  const startDate = new Date(from ?? Date.now());
-  const endDate = new Date(to ?? startDate);
+  // from and to query params are optional
+  const startDate = new Date(req.query.from ?? Date.now());
+  const endDate = new Date(req.query.to ?? startDate);
   startDate.setHours(0, 0, 0, 0);
   endDate.setHours(23, 59, 59, 999);
 
-  const orders = await Order.find({
-    shipper: req.params.id,
+  // setup pagination
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const queryObj = {
+    shipper: mongoose.Types.ObjectId.createFromHexString(req.params.id),
     createdAt: {
       $gte: startDate,
       $lt: endDate,
     },
-  }).sort('createdAt');
+  };
+
+  const orders = await Order.find(queryObj)
+    .sort('createdAt')
+    .skip(skip)
+    .limit(limit);
 
   const totalOrdersAmountAggreate = await Order.aggregate([
     {
-      $match: {
-        shipper: mongoose.Types.ObjectId.createFromHexString(req.params.id),
-        createdAt: { $gte: startDate, $lt: endDate },
-      },
+      $match: queryObj,
     },
     {
       $group: {
@@ -44,9 +50,9 @@ const getAllOrdersperShipper = async (req, res) => {
       ? totalOrdersAmountAggreate[0].total
       : 0;
 
-  res
-    .status(StatusCodes.OK)
-    .json({ orders, count: orders.length, totalOrdersAmount });
+  const totalMatches = await Order.countDocuments(queryObj);
+
+  res.status(StatusCodes.OK).json({ orders, totalMatches, totalOrdersAmount });
 };
 
 const getAllOrdersStatus = async (req, res) => {
