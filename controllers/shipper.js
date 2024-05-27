@@ -24,7 +24,17 @@ const getSingleShipper = async (req, res) => {
 };
 
 const updateShipper = async (req, res) => {
-  res.send('Update shipper');
+  const { id: shipperId } = req.params;
+  const shipper = await Shipper.findOneAndUpdate({ _id: shipperId }, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!shipper) {
+    throw new CustomError.NotFoundError(`No shipper with id : ${shipperId}`);
+  }
+
+  res.status(StatusCodes.OK).json(shipper);
 };
 
 const suspendShipper = async (req, res) => {
