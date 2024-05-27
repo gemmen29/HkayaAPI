@@ -3,8 +3,15 @@ const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 
 const getAllShipper = async (req, res) => {
-  const shippers = await Shipper.find({});
-  res.status(StatusCodes.OK).json({ shippers, count: shippers.length });
+  // setup pagination
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const shippers = await Shipper.find({}).sort('name').skip(skip).limit(limit);
+  const totalMatches = await Shipper.countDocuments();
+
+  res.status(StatusCodes.OK).json({ shippers, totalMatches });
 };
 
 const createShipper = async (req, res) => {
