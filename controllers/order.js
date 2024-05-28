@@ -39,11 +39,7 @@ const getAllOrders = async (req, res) => {
 };
 
 const getAllOrdersperShipper = async (req, res) => {
-  // from and to query params are optional
-  const startDate = new Date(req.query.from ?? Date.now());
-  const endDate = new Date(req.query.to ?? startDate);
-  startDate.setHours(0, 0, 0, 0);
-  endDate.setHours(23, 59, 59, 999);
+  const { startDate, endDate } = timeFilteration(req.query);
 
   const queryObj = {
     shipper: mongoose.Types.ObjectId.createFromHexString(req.params.id),
@@ -88,8 +84,7 @@ const getAllOrdersperShipper = async (req, res) => {
 };
 
 const getAllOrdersStatus = async (req, res) => {
-  const { from, to } = req.query;
-  const { startDate, endDate } = timeFilteration(from, to);
+  const { startDate, endDate } = timeFilteration(req.query);
 
   const orders = await Order.aggregate([
     {
