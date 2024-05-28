@@ -4,11 +4,24 @@ const CustomError = require('../errors');
 const pagination = require('../utils/pagination');
 
 const getAllShipper = async (req, res) => {
+  const { activeShippersOnly } = req.query;
+  const queryObj = {};
+
+  if (activeShippersOnly === 'true' || !activeShippersOnly) {
+    queryObj.suspended = false;
+  }
+
+  console.log(activeShippersOnly, queryObj);
+
   const { skip, limit, totalMatches, numOfPages } = await pagination(
     Shipper,
-    req
+    req,
+    queryObj
   );
-  const shippers = await Shipper.find({}).sort('name').skip(skip).limit(limit);
+  const shippers = await Shipper.find(queryObj)
+    .sort('name')
+    .skip(skip)
+    .limit(limit);
 
   res.status(StatusCodes.OK).json({ shippers, totalMatches, numOfPages });
 };
