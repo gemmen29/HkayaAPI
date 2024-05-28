@@ -1,4 +1,5 @@
-const timeFilteration = (from, to) => {
+const timeFilteration = (query) => {
+  const { from, to } = query;
   const startDate = new Date(from ?? Date.now());
   const endDate = new Date(to ?? Date.now());
   startDate.setHours(0, 0, 0, 0);
