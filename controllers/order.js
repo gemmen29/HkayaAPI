@@ -9,13 +9,14 @@ const Shipper = require('../models/Shipper');
 
 const getAllOrders = async (req, res) => {
   // from and to query params are optional
-  const now = new Date();
-  const startDate = new Date(
-    req.query.from ?? new Date(now.getFullYear(), now.getMonth(), 1)
-  );
-  const endDate = new Date(req.query.to ?? now);
-  startDate.setHours(0, 0, 0, 0);
-  endDate.setHours(23, 59, 59, 999);
+  const { startDate, endDate } = timeFilteration(req.query);
+  // const now = new Date();
+  // const startDate = new Date(
+  //   req.query.from ?? new Date(now.getFullYear(), now.getMonth(), 1)
+  // );
+  // const endDate = new Date(req.query.to ?? now);
+  // startDate.setHours(0, 0, 0, 0);
+  // endDate.setHours(23, 59, 59, 999);
 
   const queryObj = {
     createdAt: {
@@ -39,6 +40,7 @@ const getAllOrders = async (req, res) => {
 };
 
 const getAllOrdersperShipper = async (req, res) => {
+  // setup time filteration
   const { startDate, endDate } = timeFilteration(req.query);
 
   const queryObj = {
@@ -84,6 +86,7 @@ const getAllOrdersperShipper = async (req, res) => {
 };
 
 const getAllOrdersStatus = async (req, res) => {
+  // setup time filteration
   const { startDate, endDate } = timeFilteration(req.query);
 
   const orders = await Order.aggregate([
