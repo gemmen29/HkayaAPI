@@ -2,6 +2,7 @@ const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const mongoose = require('mongoose');
 const pagination = require('../utils/pagination');
+const timeFilteration = require('../utils/time-filteration');
 
 const Order = require('../models/Order');
 const Shipper = require('../models/Shipper');
@@ -88,11 +89,7 @@ const getAllOrdersperShipper = async (req, res) => {
 
 const getAllOrdersStatus = async (req, res) => {
   const { from, to } = req.query;
-
-  const startDate = new Date(from ?? Date.now());
-  const endDate = new Date(to ?? startDate);
-  startDate.setHours(0, 0, 0, 0);
-  endDate.setHours(23, 59, 59, 999);
+  const { startDate, endDate } = timeFilteration(from, to);
 
   const orders = await Order.aggregate([
     {
