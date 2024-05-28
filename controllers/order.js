@@ -1,8 +1,10 @@
-const Order = require('../models/order');
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const mongoose = require('mongoose');
 const pagination = require('../utils/pagination');
+
+const Order = require('../models/Order');
+const Shipper = require('../models/Shipper');
 
 const getAllOrders = async (req, res) => {
   // from and to query params are optional
@@ -117,6 +119,19 @@ const getAllOrdersStatus = async (req, res) => {
 };
 
 const createOrder = async (req, res) => {
+  const { shipper } = req.body;
+  const currentShipper = await Shipper.findOne({ _id: shipper });
+
+  if (!currentShipper) {
+    throw new CustomError.NotFoundError(`No shipper with id: ${shipper}`);
+  }
+
+  if (currentShipper.suspended) {
+    throw new CustomError.BadRequestError(
+      `Shipper with id: ${shipper} is suspended`
+    );
+  }
+
   const order = await Order.create(req.body);
   res.status(StatusCodes.CREATED).json(order);
 };
