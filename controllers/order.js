@@ -8,15 +8,8 @@ const Order = require('../models/Order');
 const Shipper = require('../models/Shipper');
 
 const getAllOrders = async (req, res) => {
-  // from and to query params are optional
+  // setup time filteration
   const { startDate, endDate } = timeFilteration(req.query);
-  // const now = new Date();
-  // const startDate = new Date(
-  //   req.query.from ?? new Date(now.getFullYear(), now.getMonth(), 1)
-  // );
-  // const endDate = new Date(req.query.to ?? now);
-  // startDate.setHours(0, 0, 0, 0);
-  // endDate.setHours(23, 59, 59, 999);
 
   const queryObj = {
     createdAt: {

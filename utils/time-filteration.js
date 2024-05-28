@@ -5,8 +5,6 @@ const timeFilteration = (query) => {
   startDate.setHours(0, 0, 0, 0);
   endDate.setHours(23, 59, 59, 999);
 
-  console.log(startDate.toLocaleString(), endDate.toLocaleString());
-
   return { startDate, endDate };
 };
 
